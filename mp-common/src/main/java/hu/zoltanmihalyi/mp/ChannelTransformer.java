@@ -4,12 +4,12 @@ import java.util.function.Consumer;
 
 public class ChannelTransformer<I, O> implements Channel<I> {
 
-    private Channel<O> target;
-    private Converter<I, O> converter;
-    private Consumer<O> onMessage;
-    private Consumer<ConversionFailureException> onError;
+    private Channel<? super O> target;
+    private Converter<? super I, ? extends O> converter;
+    private Consumer<? super O> onMessage;
+    private Consumer<? super ConversionFailureException> onError;
 
-    public ChannelTransformer(Channel<O> target, Converter<I, O> converter) {
+    public ChannelTransformer(Channel<? super O> target, Converter<? super I, ? extends O> converter) {
         this.target = target;
         onMessage = target::onMessage;
         onError = target::onError;
