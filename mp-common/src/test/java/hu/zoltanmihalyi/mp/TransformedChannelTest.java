@@ -5,13 +5,13 @@ import static org.mockito.Mockito.verify;
 
 import org.junit.Test;
 
-public class ChannelTransformerTest {
+public class TransformedChannelTest {
 
     @Test
     public void testMessage() {
         @SuppressWarnings("unchecked")
         Channel<String> channel = mock(Channel.class);
-        ChannelTransformer<Object, String> toStringTransformer = new ChannelTransformer<>(channel,
+        TransformedChannel<Object, String> toStringTransformer = new TransformedChannel<>(channel,
                 (o, callback, onError) -> callback.accept(o.toString()));
 
         toStringTransformer.onMessage(12);
@@ -22,7 +22,7 @@ public class ChannelTransformerTest {
     public void testOnErrorForwarded() {
         @SuppressWarnings("unchecked")
         Channel<Object> channel = mock(Channel.class);
-        ChannelTransformer<Object, Object> identityTransformer = new IdentityTransformer<>(channel);
+        TransformedChannel<Object, Object> identityTransformer = new IdentityTransformer<>(channel);
 
         Exception exception = mock(Exception.class);
         identityTransformer.onError(exception);
@@ -33,13 +33,13 @@ public class ChannelTransformerTest {
     public void testOnCloseForwarded() {
         @SuppressWarnings("unchecked")
         Channel<Object> channel = mock(Channel.class);
-        ChannelTransformer<Object, Object> identityTransformer = new IdentityTransformer<>(channel);
+        TransformedChannel<Object, Object> identityTransformer = new IdentityTransformer<>(channel);
 
         identityTransformer.onClose();
         verify(channel).onClose();
     }
 
-    private static class IdentityTransformer<T> extends ChannelTransformer<T, T> {
+    private static class IdentityTransformer<T> extends TransformedChannel<T, T> {
         public IdentityTransformer(Channel<T> target) {
             super(target, (o, callback, onError) -> callback.accept(o));
         }
