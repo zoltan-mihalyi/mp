@@ -14,47 +14,46 @@ public class TransformedChannelStepDefinitions {
 
     @SuppressWarnings("unchecked")
     @Given("^a transformed channel with a converter which converts integers to string$")
-    public void a_transformed_channel_with_a_converter_which_converts_integers_to_string()
-            throws Throwable {
+    public void a_transformed_channel_with_a_converter_which_converts_integers_to_string() {
         targetChannel = mock(Channel.class);
         transformedChannel = new TransformedChannel<>(targetChannel, new ToStringConverter());
     }
 
     @When("^a message is sent to the transformed channel with value (\\d+)$")
-    public void a_message_is_sent_to_the_transformed_channel(int value) throws Throwable {
+    public void a_message_is_sent_to_the_transformed_channel(int value) {
         transformedChannel.onMessage(value);
     }
 
     @Then("^the target channel receives the message \"(.*)\"$")
-    public void the_target_channel_receives_the_message(String message) throws Throwable {
+    public void the_target_channel_receives_the_message(String message) {
         verify(targetChannel).onMessage(message);
     }
 
     @SuppressWarnings("unchecked")
     @Given("^a transformed channel$")
-    public void a_transformed_channel() throws Throwable {
+    public void a_transformed_channel() {
         Converter<Object, String> converter = mock(Converter.class);
         targetChannel = mock(Channel.class);
         transformedChannel = new TransformedChannel<>(targetChannel, converter);
     }
 
     @When("^the transformed channel receives a close event$")
-    public void the_transformed_channel_receives_a_close_event() throws Throwable {
+    public void the_transformed_channel_receives_a_close_event() {
         transformedChannel.onClose();
     }
 
     @Then("^the target channel receives the close event$")
-    public void the_target_channel_receives_the_close_event() throws Throwable {
+    public void the_target_channel_receives_the_close_event() {
         verify(targetChannel).onClose();
     }
 
     @When("^the transformed channel receives an error event$")
-    public void the_transformed_channel_receives_an_error_event() throws Throwable {
+    public void the_transformed_channel_receives_an_error_event() {
         transformedChannel.onError(any());
     }
 
     @Then("^the target channel receives the error event$")
-    public void the_target_channel_receives_the_error_event() throws Throwable {
+    public void the_target_channel_receives_the_error_event() {
         verify(targetChannel).onError(any());
     }
 
