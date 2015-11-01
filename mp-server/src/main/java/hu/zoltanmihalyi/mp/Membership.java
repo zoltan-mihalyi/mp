@@ -18,11 +18,12 @@ public class Membership {
         return user;
     }
 
-    public <T> void grant(Class<? super T> privilegeType, T t) {
+    public <T extends Privilege> void grant(Class<? super T> privilegeType, T privilege) {
         if (hasPrivilege(privilegeType)) {
             throw new PrivilegeAlreadyGrantedException();
         }
-        privileges.put(privilegeType, t);
+        privilege.setMembership(this);
+        privileges.put(privilegeType, privilege);
     }
 
     public void revoke(Class<?> privilegeType) {

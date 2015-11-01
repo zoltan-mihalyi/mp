@@ -13,6 +13,7 @@ import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class PrivilegeStepDefinition {
     private Membership membership;
+    private TImpl privilege;
 
     @Given("^a membership$")
     public void a_membership() {
@@ -21,7 +22,8 @@ public class PrivilegeStepDefinition {
 
     @When("^a privilege with type T is granted$")
     public void a_privilege_with_type_T_is_granted() {
-        membership.grant(T.class, new T() {});
+        privilege = new TImpl();
+        membership.grant(T.class, privilege);
     }
 
     @Then("^getting the privilege with type T results the privilege$")
@@ -37,7 +39,7 @@ public class PrivilegeStepDefinition {
 
     @Then("^granting a privilege with type T results an error$")
     public void granting_a_privilege_with_type_T_results_an_error() {
-        catchException(membership).grant(T.class, new T() {});
+        catchException(membership).grant(T.class, new TImpl());
         assertTrue(caughtException() instanceof PrivilegeAlreadyGrantedException);
     }
 
@@ -57,7 +59,14 @@ public class PrivilegeStepDefinition {
         membership.revoke(T.class);
     }
 
-    private interface T {
+    @Then("^the privilege belongs to the membership$")
+    public void the_privilege_belongs_to_the_membership() throws Throwable {
+        assertSame(membership, privilege.getMembership());
+    }
 
+    private interface T {
+    }
+
+    private class TImpl extends Privilege implements T{
     }
 }

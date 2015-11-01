@@ -2,6 +2,7 @@ Feature: Privilege
   Scenario: Getting granted privilege
     Given a membership
     When a privilege with type T is granted
+    Then the privilege belongs to the membership
     Then getting the privilege with type T results the privilege
 
   Scenario: Getting not granted privilege
