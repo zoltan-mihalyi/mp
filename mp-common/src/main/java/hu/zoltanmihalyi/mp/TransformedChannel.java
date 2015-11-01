@@ -1,13 +1,11 @@
 package hu.zoltanmihalyi.mp;
 
-import java.util.function.Consumer;
-
 public class TransformedChannel<I, O> implements Channel<I> {
 
     private Channel<? super O> target;
     private Converter<? super I, ? extends O> converter;
-    private Consumer<? super O> onMessage;
-    private Consumer<? super ConversionFailureException> onError;
+    private Callback<? super O> onMessage;
+    private Callback<? super ConversionFailureException> onError;
 
     public TransformedChannel(Channel<? super O> target, Converter<? super I, ? extends O> converter) {
         this.target = target;

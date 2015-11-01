@@ -4,31 +4,29 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import java.util.function.Consumer;
-
 import org.junit.Test;
 
 public class SynchronousConverterTest {
-    Consumer<Object> EMPTY_CALLBACK = o -> {
+    Callback<Object> EMPTY_CALLBACK = o -> {
     };
 
     @Test
     public void testCallbackCalledWithConvertedParameter() {
         SynchronousConverter<Object, String> toStringConverter = new ToStringConverter();
         @SuppressWarnings("unchecked")
-        Consumer<String> callback = mock(Consumer.class);
+        Callback<String> callback = mock(Callback.class);
         toStringConverter.convert(1, callback, EMPTY_CALLBACK);
-        verify(callback).accept("1");
+        verify(callback).call("1");
     }
 
     @Test
     public void testErrorCallbackCalledWhenExceptionThrown() {
         SynchronousConverter<Object, Object> failingConverter = new FailingConverter();
         @SuppressWarnings("unchecked")
-        Consumer<ConversionFailureException> errorCallback = mock(Consumer.class);
+        Callback<ConversionFailureException> errorCallback = mock(Callback.class);
 
         failingConverter.convert(new Object(), EMPTY_CALLBACK, errorCallback);
-        verify(errorCallback).accept(any(ConversionFailureException.class));
+        verify(errorCallback).call(any(ConversionFailureException.class));
     }
 
     private static class ToStringConverter extends SynchronousConverter<Object, String> {

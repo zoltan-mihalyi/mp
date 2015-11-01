@@ -1,19 +1,17 @@
 package hu.zoltanmihalyi.mp;
 
-import java.util.function.Consumer;
-
 public abstract class SynchronousConverter<I, O> implements Converter<I, O> {
 
     @Override
-    public final void convert(I i, Consumer<? super O> callback, Consumer<? super ConversionFailureException> onError) {
+    public final void convert(I i, Callback<? super O> callback, Callback<? super ConversionFailureException> onError) {
         O result;
         try {
             result = convert(i);
         } catch (ConversionFailureException ex) {
-            onError.accept(ex);
+            onError.call(ex);
             return;
         }
-        callback.accept(result);
+        callback.call(result);
     }
 
     public abstract O convert(I i) throws ConversionFailureException;
