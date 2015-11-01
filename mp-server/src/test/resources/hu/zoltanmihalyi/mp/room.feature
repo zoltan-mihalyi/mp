@@ -4,7 +4,8 @@ Feature: Room
     Given a user
     When a user is added to the room
     Then the room notifies the listener about the new membership
-    Then the room should contain the user
+    And the membership belongs to the user
+    And the room should contain the user
 
   Scenario: A user is not added to a room
     Given a room

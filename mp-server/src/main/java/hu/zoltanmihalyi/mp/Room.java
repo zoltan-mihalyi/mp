@@ -8,7 +8,7 @@ public abstract class Room {
 
     public void addUser(User user) {
         users.add(user);
-        onJoin(null);
+        onJoin(new Membership(user));
     }
 
     public boolean contains(User user) {

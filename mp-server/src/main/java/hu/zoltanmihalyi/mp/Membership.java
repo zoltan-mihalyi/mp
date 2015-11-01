@@ -8,6 +8,15 @@ import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
 
 public class Membership {
     private Map<Class<?>, Object> privileges = new HashMap<>();
+    private User user;
+
+    public Membership(User user) {
+        this.user = user;
+    }
+
+    public User getUser() {
+        return user;
+    }
 
     public <T> void grant(Class<? super T> privilegeType, T t) {
         if (hasPrivilege(privilegeType)) {
@@ -16,8 +25,8 @@ public class Membership {
         privileges.put(privilegeType, t);
     }
 
-    public void revoke(Class<?> privilegeType){
-        if(!hasPrivilege(privilegeType)) {
+    public void revoke(Class<?> privilegeType) {
+        if (!hasPrivilege(privilegeType)) {
             throw new PrivilegeNotFoundException();
         }
         privileges.remove(privilegeType);

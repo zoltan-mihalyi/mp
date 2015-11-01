@@ -16,7 +16,7 @@ public class PrivilegeStepDefinition {
 
     @Given("^a membership$")
     public void a_membership() {
-        membership = new Membership();
+        membership = new Membership(new User());
     }
 
     @When("^a privilege with type T is granted$")
@@ -42,7 +42,7 @@ public class PrivilegeStepDefinition {
     }
 
     @Then("^checking for privilege T results \"(true|false)\"$")
-    public void checking_for_privilege_T_results(boolean hasPrivilege)  {
+    public void checking_for_privilege_T_results(boolean hasPrivilege) {
         assertEquals(hasPrivilege, membership.hasPrivilege(T.class));
     }
 
