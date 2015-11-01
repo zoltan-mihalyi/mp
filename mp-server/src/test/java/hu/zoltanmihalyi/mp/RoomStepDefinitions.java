@@ -30,7 +30,7 @@ public class RoomStepDefinitions {
         user = new User();
     }
 
-    @When("^a user is added to the room$")
+    @When("^the user is added to the room$")
     public void a_user_is_added_to_the_room() {
         room.addUser(user);
     }
@@ -53,5 +53,15 @@ public class RoomStepDefinitions {
     @And("^the membership belongs to the user$")
     public void the_membership_belongs_to_the_user() {
         assertSame(user, membership.getUser());
+    }
+
+    @When("^the user is removed from the room$")
+    public void the_user_is_removed_from_the_room() {
+        room.removeUser(user);
+    }
+
+    @When("^the membership is revoked$")
+    public void the_membership_is_revoked() {
+        membership.revoke();
     }
 }

@@ -10,9 +10,11 @@ import hu.zoltanmihalyi.mp.privilege.PrivilegeReuseException;
 public class Membership {
     private Map<Class<?>, Object> privileges = new HashMap<>();
     private User user;
+    private Room room;
 
-    public Membership(User user) {
+    public Membership(User user, Room room) {
         this.user = user;
+        this.room = room;
     }
 
     public User getUser() {
@@ -30,7 +32,7 @@ public class Membership {
         privileges.put(privilegeType, privilege);
     }
 
-    public void revoke(Class<?> privilegeType) {
+    public void revokePrivilege(Class<?> privilegeType) {
         if (!hasPrivilege(privilegeType)) {
             throw new PrivilegeNotFoundException();
         }
@@ -47,5 +49,9 @@ public class Membership {
             throw new PrivilegeNotFoundException();
         }
         return (T) privileges.get(privilegeType);
+    }
+
+    public void revoke() {
+        room.removeUser(user);
     }
 }

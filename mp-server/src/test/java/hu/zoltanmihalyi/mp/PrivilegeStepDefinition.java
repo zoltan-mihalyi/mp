@@ -3,6 +3,7 @@ package hu.zoltanmihalyi.mp;
 import static com.googlecode.catchexception.CatchException.catchException;
 import static com.googlecode.catchexception.CatchException.caughtException;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
@@ -19,7 +20,7 @@ public class PrivilegeStepDefinition {
 
     @Given("^a membership$")
     public void a_membership() {
-        membership = new Membership(new User());
+        membership = createMembership();
     }
 
     @When("^a privilege with type T is granted$")
@@ -52,13 +53,13 @@ public class PrivilegeStepDefinition {
 
     @Then("^revoking privilege with type T results an error$")
     public void revoking_privilege_with_type_T_results_an_error() {
-        catchException(membership).revoke(T.class);
+        catchException(membership).revokePrivilege(T.class);
         assertTrue(caughtException() instanceof PrivilegeNotFoundException);
     }
 
     @When("^revoking privilege with type T$")
     public void revoking_privilege_with_type_T() {
-        membership.revoke(T.class);
+        membership.revokePrivilege(T.class);
     }
 
     @Then("^the privilege belongs to the membership$")
@@ -68,13 +69,17 @@ public class PrivilegeStepDefinition {
 
     @Given("^an another membership$")
     public void an_another_membership() {
-        anotherMembership = new Membership(new User());
+        anotherMembership = createMembership();
     }
 
     @Then("^granting the same privilege to the another membership results an error$")
     public void granting_the_same_privilege_to_the_another_membership_results_an_error() {
         catchException(anotherMembership).grant(T.class, privilege);
         assertTrue(caughtException() instanceof PrivilegeReuseException);
+    }
+
+    private static Membership createMembership() {
+        return new Membership(mock(User.class), mock(Room.class));
     }
 
     private interface T {
