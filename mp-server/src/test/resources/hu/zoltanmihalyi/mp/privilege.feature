@@ -32,3 +32,9 @@ Feature: Privilege
     Given a privilege with type T is granted
     When revoking privilege with type T
     Then checking for privilege T results "false"
+
+  Scenario: Adding the same privilege to two membership
+    Given a membership
+    Given an another membership
+    When a privilege with type T is granted
+    Then granting the same privilege to the another membership results an error

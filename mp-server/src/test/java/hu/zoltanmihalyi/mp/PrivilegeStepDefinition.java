@@ -9,10 +9,12 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hu.zoltanmihalyi.mp.privilege.PrivilegeAlreadyGrantedException;
 import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
+import hu.zoltanmihalyi.mp.privilege.PrivilegeReuseException;
 
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class PrivilegeStepDefinition {
     private Membership membership;
+    private Membership anotherMembership;
     private TImpl privilege;
 
     @Given("^a membership$")
@@ -60,13 +62,24 @@ public class PrivilegeStepDefinition {
     }
 
     @Then("^the privilege belongs to the membership$")
-    public void the_privilege_belongs_to_the_membership() throws Throwable {
+    public void the_privilege_belongs_to_the_membership() {
         assertSame(membership, privilege.getMembership());
+    }
+
+    @Given("^an another membership$")
+    public void an_another_membership() {
+        anotherMembership = new Membership(new User());
+    }
+
+    @Then("^granting the same privilege to the another membership results an error$")
+    public void granting_the_same_privilege_to_the_another_membership_results_an_error() {
+        catchException(anotherMembership).grant(T.class, privilege);
+        assertTrue(caughtException() instanceof PrivilegeReuseException);
     }
 
     private interface T {
     }
 
-    private class TImpl extends Privilege implements T{
+    private class TImpl extends Privilege implements T {
     }
 }

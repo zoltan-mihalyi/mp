@@ -10,4 +10,8 @@ public class Privilege {
     void setMembership(Membership membership) {
         this.membership = membership;
     }
+
+    public boolean hasMembership() {
+        return membership != null;
+    }
 }
