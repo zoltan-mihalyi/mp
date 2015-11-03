@@ -1,6 +1,8 @@
 package hu.zoltanmihalyi.mp;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class Room {
@@ -19,5 +21,13 @@ public abstract class Room {
 
     public void removeUser(User user) {
         users.remove(user);
+    }
+
+    public List<User> getUsers() {
+        return new ArrayList<>(users);
+    }
+
+    public int getUsersCount() {
+        return users.size();
     }
 }
