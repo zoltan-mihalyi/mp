@@ -4,6 +4,9 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import hu.zoltanmihalyi.mp.event.JoinEvent;
+import hu.zoltanmihalyi.mp.event.LeaveEvent;
+import hu.zoltanmihalyi.mp.event.ServerEvent;
 import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
 import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
 
@@ -17,6 +20,7 @@ import static org.mockito.Mockito.*;
 public class RoomStepDefinitions {
     private Room room;
     private User user;
+    private Channel<ServerEvent> channel;
     private User anotherUser;
     private Membership membership;
 
@@ -33,7 +37,8 @@ public class RoomStepDefinitions {
     @Given("^a user$")
     @SuppressWarnings("unchecked")
     public void a_user() {
-        user = new User(mock(Channel.class));
+        channel = mock(Channel.class);
+        user = new User(channel);
     }
 
     @When("^the user is added to the room$")
@@ -105,5 +110,15 @@ public class RoomStepDefinitions {
     @Then("^adding the user to the room again results an exception$")
     public void adding_the_user_to_the_room_again_results_an_exception() {
         Helper.verifyException(UserAlreadyAddedException.class, () -> room.addUser(user));
+    }
+
+    @Then("^the channel should be notified about the join event$")
+    public void the_channel_should_be_notified_about_the_join_event() {
+        verify(channel).onMessage(isA(JoinEvent.class));
+    }
+
+    @Then("^the channel should be notified about the leave event$")
+    public void theChannelShouldBeNotifiedAboutTheLeaveEvent() throws Throwable {
+        verify(channel).onMessage(isA(LeaveEvent.class));
     }
 }

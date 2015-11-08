@@ -7,6 +7,7 @@ Feature: Room
     And the membership belongs to the user
     And the room should contain the user
     And the number of users in the room should be 1
+    And the channel should be notified about the join event
 
   Scenario: A user is added to a room two times
     Given a room
@@ -26,6 +27,7 @@ Feature: Room
     And the user is added to the room
     When the user is removed from the room
     Then the room should not contain the user
+    And the channel should be notified about the leave event
 
   Scenario: Revoking membership
     Given a room
