@@ -3,6 +3,8 @@ package hu.zoltanmihalyi.mp;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import hu.zoltanmihalyi.mp.event.JoinEvent;
+import hu.zoltanmihalyi.mp.event.LeaveEvent;
 import hu.zoltanmihalyi.mp.event.ServerEvent;
 
 import static org.mockito.Mockito.*;
@@ -11,6 +13,7 @@ public class ServerStepDefinitions {
     private Server server;
     private Channel<ServerEvent> channel;
     private User user;
+    private Room room;
 
     @Given("^a server$")
     public void a_server() {
@@ -38,19 +41,32 @@ public class ServerStepDefinitions {
         verify(server).onConnect(any());
     }
 
-    @When("^the user of the channel is added to a room$")
-    public void the_user_of_the_channel_is_added_to_a_room() {
-        Room room = new Room() {
-            @Override
-            protected void onJoin(Membership membership) {
-
-            }
-        };
+    @When("^the user of the channel is added to the room$")
+    public void the_user_of_the_channel_is_added_to_the_room() {
         room.addUser(user);
     }
 
     @Then("^the channel should be notified about the join event$")
     public void the_channel_should_be_notified_about_the_join_event() {
-        verify(channel).onMessage(any());
+        verify(channel).onMessage(isA(JoinEvent.class));
+    }
+
+    @Given("^a room for server$")
+    public void a_room() {
+        this.room = new Room() {
+            @Override
+            protected void onJoin(Membership membership) {
+            }
+        };
+    }
+
+    @When("^the user of the channel is removed from the room$")
+    public void the_user_of_the_channel_is_removed_from_the_room() throws Throwable {
+        room.removeUser(user);
+    }
+
+    @Then("^the channel should be notified about the leave event$")
+    public void theChannelShouldBeNotifiedAboutTheLeaveEvent() throws Throwable {
+        verify(channel).onMessage(isA(LeaveEvent.class));
     }
 }
