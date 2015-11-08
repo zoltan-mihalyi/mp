@@ -3,9 +3,9 @@ package hu.zoltanmihalyi.mp;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import hu.zoltanmihalyi.mp.privilege.PrivilegeAlreadyGrantedException;
-import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
-import hu.zoltanmihalyi.mp.privilege.PrivilegeReuseException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;

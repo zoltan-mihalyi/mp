@@ -3,9 +3,9 @@ package hu.zoltanmihalyi.mp;
 import java.util.HashMap;
 import java.util.Map;
 
-import hu.zoltanmihalyi.mp.privilege.PrivilegeAlreadyGrantedException;
-import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
-import hu.zoltanmihalyi.mp.privilege.PrivilegeReuseException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
 
 public class Membership {
     private Map<Class<?>, Object> privileges = new HashMap<>();

@@ -1,5 +1,8 @@
 package hu.zoltanmihalyi.mp;
 
+import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
+import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
