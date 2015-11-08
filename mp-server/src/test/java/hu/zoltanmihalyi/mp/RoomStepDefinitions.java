@@ -12,8 +12,7 @@ import java.util.Set;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class RoomStepDefinitions {
     private Room room;
@@ -32,8 +31,9 @@ public class RoomStepDefinitions {
     }
 
     @Given("^a user$")
+    @SuppressWarnings("unchecked")
     public void a_user() {
-        user = new User();
+        user = new User(mock(Channel.class));
     }
 
     @When("^the user is added to the room$")
@@ -72,8 +72,9 @@ public class RoomStepDefinitions {
     }
 
     @And("^another user is added to the room$")
+    @SuppressWarnings("unchecked")
     public void another_user_is_added_to_the_room() {
-        anotherUser = new User();
+        anotherUser = new User(mock(Channel.class));
         room.addUser(anotherUser);
     }
 
@@ -102,7 +103,7 @@ public class RoomStepDefinitions {
     }
 
     @Then("^adding the user to the room again results an exception$")
-    public void addingTheUserToTheRoomAgainResultsAnException() {
+    public void adding_the_user_to_the_room_again_results_an_exception() {
         Helper.verifyException(UserAlreadyAddedException.class, () -> room.addUser(user));
     }
 }

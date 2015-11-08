@@ -1,5 +1,6 @@
 package hu.zoltanmihalyi.mp;
 
+import hu.zoltanmihalyi.mp.event.JoinEvent;
 import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
 import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
 
@@ -17,6 +18,7 @@ public abstract class Room {
         }
         Membership membership = new Membership(user, this);
         users.put(user, membership);
+        user.onMessage(new JoinEvent());
         onJoin(membership);
     }
 
