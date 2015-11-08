@@ -1,18 +1,17 @@
 package hu.zoltanmihalyi.mp;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.notNull;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import cucumber.api.PendingException;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 public class RoomStepDefinitions {
     private Room room;
@@ -86,7 +85,17 @@ public class RoomStepDefinitions {
     }
 
     @And("^the number of users in the room should be (\\d+)$")
-    public void the_number_of_users_in_the_room_should_be(int size) throws Throwable {
+    public void the_number_of_users_in_the_room_should_be(int size) {
         assertEquals(size, room.getUsersCount());
+    }
+
+    @Then("^getting the membership of the user in the room results the membership$")
+    public void getting_the_membership_of_the_user_in_the_room_results_the_membership() {
+        assertSame(membership, room.getMembershipOf(user));
+    }
+
+    @Then("^getting the membership of the user in the room results an error$")
+    public void getting_the_membership_of_the_user_in_the_room_results_an_error() {
+        Helper.verifyException(UserNotFoundException.class, () -> room.getMembershipOf(user));
     }
 }

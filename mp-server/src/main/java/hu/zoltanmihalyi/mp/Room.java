@@ -1,20 +1,21 @@
 package hu.zoltanmihalyi.mp;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public abstract class Room {
-    private Set<User> users = new HashSet<>();
+    private Map<User, Membership> users = new HashMap<>();
 
     public void addUser(User user) {
-        users.add(user);
-        onJoin(new Membership(user, this));
+        Membership membership = new Membership(user, this);
+        users.put(user, membership);
+        onJoin(membership);
     }
 
     public boolean contains(User user) {
-        return users.contains(user);
+        return users.containsKey(user);
     }
 
     protected abstract void onJoin(Membership membership);
@@ -24,10 +25,17 @@ public abstract class Room {
     }
 
     public List<User> getUsers() {
-        return new ArrayList<>(users);
+        return new ArrayList<>(users.keySet());
     }
 
     public int getUsersCount() {
         return users.size();
+    }
+
+    public Membership getMembershipOf(User user) {
+        if(!users.containsKey(user)){
+            throw new UserNotFoundException();
+        }
+        return users.get(user);
     }
 }

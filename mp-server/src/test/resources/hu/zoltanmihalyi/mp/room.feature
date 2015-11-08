@@ -41,3 +41,14 @@ Feature: Room
     When the user is added to the room
     And another user is added to the room
     Then the number of users in the room should be 2
+
+  Scenario: Getting the membership of an existing user
+    Given a room
+    Given a user
+    When the user is added to the room
+    Then getting the membership of the user in the room results the membership
+
+  Scenario: Getting the membership of a not existing user
+    Given a room
+    Given a user
+    Then getting the membership of the user in the room results an error

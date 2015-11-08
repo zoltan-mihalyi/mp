@@ -16,12 +16,6 @@
 			<artifactId>mp-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>eu.codearte.catch-exception</groupId>
-			<artifactId>catch-exception</artifactId>
-			<version>1.4.4</version>
-			<scope>test</scope>
-		</dependency>
 	</dependencies>
 
 

@@ -1,10 +1,5 @@
 package hu.zoltanmihalyi.mp;
 
-import static com.googlecode.catchexception.CatchException.catchException;
-import static com.googlecode.catchexception.CatchException.caughtException;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -12,7 +7,9 @@ import hu.zoltanmihalyi.mp.privilege.PrivilegeAlreadyGrantedException;
 import hu.zoltanmihalyi.mp.privilege.PrivilegeNotFoundException;
 import hu.zoltanmihalyi.mp.privilege.PrivilegeReuseException;
 
-@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+
 public class PrivilegeStepDefinition {
     private Membership membership;
     private Membership anotherMembership;
@@ -36,14 +33,12 @@ public class PrivilegeStepDefinition {
 
     @Then("^getting the privilege with type T results an error$")
     public void getting_the_privilege_with_type_T_results_an_error() {
-        catchException(membership).getPrivilege(T.class);
-        assertTrue(caughtException() instanceof PrivilegeNotFoundException);
+        Helper.verifyException(PrivilegeNotFoundException.class, () -> membership.getPrivilege(T.class));
     }
 
     @Then("^granting a privilege with type T results an error$")
     public void granting_a_privilege_with_type_T_results_an_error() {
-        catchException(membership).grant(T.class, new TImpl());
-        assertTrue(caughtException() instanceof PrivilegeAlreadyGrantedException);
+        Helper.verifyException(PrivilegeAlreadyGrantedException.class, () -> membership.grant(T.class, new TImpl()));
     }
 
     @Then("^checking for privilege T results \"(true|false)\"$")
@@ -53,8 +48,7 @@ public class PrivilegeStepDefinition {
 
     @Then("^revoking privilege with type T results an error$")
     public void revoking_privilege_with_type_T_results_an_error() {
-        catchException(membership).revokePrivilege(T.class);
-        assertTrue(caughtException() instanceof PrivilegeNotFoundException);
+        Helper.verifyException(PrivilegeNotFoundException.class, () -> membership.revokePrivilege(T.class));
     }
 
     @When("^revoking privilege with type T$")
@@ -74,8 +68,7 @@ public class PrivilegeStepDefinition {
 
     @Then("^granting the same privilege to the another membership results an error$")
     public void granting_the_same_privilege_to_the_another_membership_results_an_error() {
-        catchException(anotherMembership).grant(T.class, privilege);
-        assertTrue(caughtException() instanceof PrivilegeReuseException);
+        Helper.verifyException(PrivilegeReuseException.class, () -> anotherMembership.grant(T.class, privilege));
     }
 
     private static Membership createMembership() {
