@@ -9,6 +9,9 @@ public abstract class Room {
     private Map<User, Membership> users = new HashMap<>();
 
     public void addUser(User user) {
+        if (contains(user)) {
+            throw new UserAlreadyAddedException();
+        }
         Membership membership = new Membership(user, this);
         users.put(user, membership);
         onJoin(membership);
@@ -33,7 +36,7 @@ public abstract class Room {
     }
 
     public Membership getMembershipOf(User user) {
-        if(!users.containsKey(user)){
+        if (!users.containsKey(user)) {
             throw new UserNotFoundException();
         }
         return users.get(user);

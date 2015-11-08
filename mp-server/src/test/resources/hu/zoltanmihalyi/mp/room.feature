@@ -8,6 +8,12 @@ Feature: Room
     And the room should contain the user
     And the number of users in the room should be 1
 
+  Scenario: A user is added to a room two times
+    Given a room
+    Given a user
+    When the user is added to the room
+    Then adding the user to the room again results an exception
+
   Scenario: A user is not added to a room
     Given a room
     Given a user

@@ -98,4 +98,9 @@ public class RoomStepDefinitions {
     public void getting_the_membership_of_the_user_in_the_room_results_an_error() {
         Helper.verifyException(UserNotFoundException.class, () -> room.getMembershipOf(user));
     }
+
+    @Then("^adding the user to the room again results an exception$")
+    public void addingTheUserToTheRoomAgainResultsAnException() {
+        Helper.verifyException(UserAlreadyAddedException.class, () -> room.addUser(user));
+    }
 }
