@@ -10,7 +10,9 @@ import hu.zoltanmihalyi.mp.event.ServerEvent;
 import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
 import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.*;
@@ -21,8 +23,10 @@ public class RoomStepDefinitions {
     private Room room;
     private User user;
     private Channel<ServerEvent> channel;
+    private List<ServerEvent> eventLog = new ArrayList<>();
     private User anotherUser;
     private Membership membership;
+    private Room anotherRoom;
 
     @Given("^a room$")
     public void a_room() {
@@ -34,10 +38,32 @@ public class RoomStepDefinitions {
         });
     }
 
+    @Given("^another room$")
+    public void another_room() {
+        anotherRoom = new Room() {
+            @Override
+            protected void onJoin(Membership membership) {
+            }
+        };
+    }
+
     @Given("^a user$")
     @SuppressWarnings("unchecked")
     public void a_user() {
-        channel = mock(Channel.class);
+        channel = spy(new Channel<ServerEvent>() {
+            @Override
+            public void onMessage(ServerEvent message) {
+                eventLog.add(message);
+            }
+
+            @Override
+            public void onClose() {
+            }
+
+            @Override
+            public void onError(Exception e) {
+            }
+        });
         user = new User(channel);
     }
 
@@ -118,7 +144,22 @@ public class RoomStepDefinitions {
     }
 
     @Then("^the channel should be notified about the leave event$")
-    public void theChannelShouldBeNotifiedAboutTheLeaveEvent() throws Throwable {
+    public void the_channel_should_be_notified_about_the_leave_event() {
         verify(channel).onMessage(isA(LeaveEvent.class));
+    }
+
+    @Then("^the leave event should contain the same identifier as the join event$")
+    public void the_leave_event_should_contain_the_same_identifier_as_the_join_event() {
+        assertEquals(eventLog.get(0).getRoomId(), eventLog.get(1).getRoomId());
+    }
+
+    @When("^the user is added to the another room$")
+    public void the_user_is_added_to_the_another_room() {
+        anotherRoom.addUser(user);
+    }
+
+    @Then("^the join events should contain different id$")
+    public void the_join_events_should_contain_different_id() {
+        assertNotEquals(eventLog.get(0).getRoomId(), eventLog.get(1).getRoomId());
     }
 }

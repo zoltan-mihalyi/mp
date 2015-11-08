@@ -28,6 +28,7 @@ Feature: Room
     When the user is removed from the room
     Then the room should not contain the user
     And the channel should be notified about the leave event
+    And the leave event should contain the same identifier as the join event
 
   Scenario: Revoking membership
     Given a room
@@ -60,3 +61,11 @@ Feature: Room
     Given a room
     Given a user
     Then getting the membership of the user in the room results an error
+
+  Scenario: A user is added to two rooms
+    Given a user
+    Given a room
+    And another room
+    When the user is added to the room
+    When the user is added to the another room
+    Then the join events should contain different id

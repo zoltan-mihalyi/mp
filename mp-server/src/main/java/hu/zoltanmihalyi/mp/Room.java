@@ -1,7 +1,5 @@
 package hu.zoltanmihalyi.mp;
 
-import hu.zoltanmihalyi.mp.event.JoinEvent;
-import hu.zoltanmihalyi.mp.event.LeaveEvent;
 import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
 import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
 
@@ -19,7 +17,7 @@ public abstract class Room {
         }
         Membership membership = new Membership(user, this);
         users.put(user, membership);
-        user.onMessage(new JoinEvent());
+        user.join(this);
         onJoin(membership);
     }
 
@@ -31,7 +29,7 @@ public abstract class Room {
 
     public void removeUser(User user) {
         users.remove(user);
-        user.onMessage(new LeaveEvent());
+        user.leave(this);
     }
 
     public List<User> getUsers() {
