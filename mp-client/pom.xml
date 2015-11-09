@@ -10,6 +10,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>mp-client</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>hu.zoltanmihalyi</groupId>
+			<artifactId>mp-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 
 
 </project>

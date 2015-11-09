@@ -19,7 +19,7 @@ public class User {
     void join(Room room) {
         int id = ++lastId;
         roomIdMap.put(room, id);
-        channel.onMessage(new JoinEvent(id));
+        channel.onMessage(new JoinEvent(id, ""));
     }
 
     void leave(Room room) {
