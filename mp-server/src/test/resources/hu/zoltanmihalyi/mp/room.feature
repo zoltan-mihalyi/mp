@@ -1,5 +1,5 @@
 Feature: Room
-  Scenario: An user is added to a room
+  Scenario: A user is added to a room
     Given a room
     Given a user
     When the user is added to the room
@@ -8,6 +8,12 @@ Feature: Room
     And the room should contain the user
     And the number of users in the room should be 1
     And the channel should be notified about the join event
+
+  Scenario: A user is added to a named room
+    Given a room with name Room1
+    Given a user
+    When the user is added to the room
+    Then the join event should have the name Room1
 
   Scenario: A user is added to a room two times
     Given a room

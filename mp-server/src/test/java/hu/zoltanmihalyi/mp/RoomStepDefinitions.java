@@ -162,4 +162,20 @@ public class RoomStepDefinitions {
     public void the_join_events_should_contain_different_id() {
         assertNotEquals(eventLog.get(0).getRoomId(), eventLog.get(1).getRoomId());
     }
+
+    @Then("^the join event should have the name Room1$")
+    public void the_join_event_should_have_the_same_name_as_the_room() {
+        assertEquals("Room1", ((JoinEvent) eventLog.get(0)).getRoomName());
+    }
+
+    @Given("^a room with name Room1$")
+    public void a_room_with_name_room1() {
+        room = new Room1();
+    }
+
+    private static class Room1 extends Room {
+        @Override
+        protected void onJoin(Membership membership) {
+        }
+    }
 }
