@@ -8,12 +8,14 @@ import lombok.EqualsAndHashCode;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Client implements Channel<ServerEvent> {
     private Map<Integer, String> roomIdToNameMap = new HashMap<>();
-    private Map<EventTypeAndRoomName, Method> eventListeners = new HashMap<>();
+    private Map<EventTypeAndRoomName, List<Method>> eventListeners = new HashMap<>();
 
 
     public Client() {
@@ -30,7 +32,11 @@ public class Client implements Channel<ServerEvent> {
     }
 
     private void addEventListener(Event event, Method method) {
-        eventListeners.put(new EventTypeAndRoomName(event.type(), event.roomName()), method);
+        EventTypeAndRoomName key = new EventTypeAndRoomName(event.type(), event.roomName());
+        if (!eventListeners.containsKey(key)) {
+            eventListeners.put(key, new ArrayList<>());
+        }
+        eventListeners.get(key).add(method);
     }
 
     @Override
@@ -45,21 +51,32 @@ public class Client implements Channel<ServerEvent> {
     private void onJoin(JoinEvent message) {
         String roomName = message.getRoomName();
         roomIdToNameMap.put(message.getRoomId(), roomName);
-        fireEvent(EventType.JOIN, roomName);
+        fireEvent(EventType.JOIN, roomName, new RemoteRoom());
     }
 
     private void onLeave(LeaveEvent message) {
         String roomName = roomIdToNameMap.get(message.getRoomId());
-        fireEvent(EventType.LEAVE, roomName);
+        fireEvent(EventType.LEAVE, roomName, null);
     }
 
-    private void fireEvent(EventType type, String roomName) {
-        Method method = eventListeners.get(new EventTypeAndRoomName(type, roomName));
-        if (method == null) {
+    private void fireEvent(EventType type, String roomName, RemoteRoom room) {
+        List<Method> methods = eventListeners.get(new EventTypeAndRoomName(type, roomName));
+        if (methods == null) {
             return;
         }
+        for (Method method : methods) {
+            invokeEventListener(method, room);
+        }
+    }
+
+    private void invokeEventListener(Method method, RemoteRoom room) {
         try {
-            method.invoke(this);
+            if (method.getParameterCount() == 0) {
+                method.invoke(this);
+            } else {
+                method.invoke(this, room);
+            }
+
         } catch (IllegalAccessException e) {
             throw new RuntimeException("Illegal access on event handler!", e);
         } catch (InvocationTargetException e) {

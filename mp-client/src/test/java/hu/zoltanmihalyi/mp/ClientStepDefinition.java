@@ -1,11 +1,13 @@
 package hu.zoltanmihalyi.mp;
 
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hu.zoltanmihalyi.mp.event.JoinEvent;
 import hu.zoltanmihalyi.mp.event.LeaveEvent;
 
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -37,10 +39,18 @@ public class ClientStepDefinition {
         verify(client).onLeaveRoom1();
     }
 
+    @And("^the annotated join method with RemoteRoom parameter is called$")
+    public void the_annotated_join_method_with_remote_room_parameter_is_called() {
+        verify(client).onJoinRoom1(isA(RemoteRoom.class));
+    }
     private static class MyClient extends Client {
         @Event(type = EventType.JOIN, roomName = "Room1")
         public void onJoinRoom1() {
 
+        }
+
+        @Event(type = EventType.JOIN, roomName = "Room1")
+        public void onJoinRoom1(RemoteRoom room) {
         }
 
         @Event(type = EventType.LEAVE, roomName = "Room1")
