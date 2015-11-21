@@ -10,3 +10,11 @@ Feature: Client
     Given a room join event is fired
     When a room leave event is fired
     Then the annotated leave method is called
+
+  Scenario: a privilege method is called
+    Given a client
+    Given a target channel set to the client
+    Given a room join event is fired
+    When a privilege method is called on the RemoteRoom
+    Then the client should send an invocation event
+    And the event should contain the correct method and parameters

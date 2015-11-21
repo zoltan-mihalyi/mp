@@ -1,8 +1,6 @@
 package hu.zoltanmihalyi.mp;
 
-import hu.zoltanmihalyi.mp.event.JoinEvent;
-import hu.zoltanmihalyi.mp.event.LeaveEvent;
-import hu.zoltanmihalyi.mp.event.ServerEvent;
+import hu.zoltanmihalyi.mp.event.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -16,7 +14,7 @@ import java.util.Map;
 public class Client implements Channel<ServerEvent> {
     private Map<Integer, String> roomIdToNameMap = new HashMap<>();
     private Map<EventTypeAndRoomName, List<Method>> eventListeners = new HashMap<>();
-
+    private Channel<ClientEvent> targetChannel;
 
     public Client() {
         for (Method method : this.getClass().getDeclaredMethods()) {
@@ -25,6 +23,10 @@ public class Client implements Channel<ServerEvent> {
                 addEventListener(event, method);
             }
         }
+    }
+
+    public void setTargetChannel(Channel<ClientEvent> targetChannel) {
+        this.targetChannel = targetChannel;
     }
 
     private Event getEventAnnotation(Method method) {
@@ -51,7 +53,7 @@ public class Client implements Channel<ServerEvent> {
     private void onJoin(JoinEvent message) {
         String roomName = message.getRoomName();
         roomIdToNameMap.put(message.getRoomId(), roomName);
-        fireEvent(EventType.JOIN, roomName, new RemoteRoom());
+        fireEvent(EventType.JOIN, roomName, new RemoteRoom(new RoomChannelImpl(message.getRoomId())));
     }
 
     private void onLeave(LeaveEvent message) {
@@ -99,5 +101,21 @@ public class Client implements Channel<ServerEvent> {
     private static class EventTypeAndRoomName {
         private EventType eventType;
         private String roomName;
+    }
+
+    private class RoomChannelImpl implements RoomChannel {
+        private int roomId;
+
+        private RoomChannelImpl(int roomId) {
+            this.roomId = roomId;
+        }
+
+        @Override
+        public void sendInvocation(Method method, Object[] args) {
+            if (args == null) {
+                args = new Object[0];
+            }
+            targetChannel.onMessage(new InvocationEvent(roomId, method, args));
+        }
     }
 }
