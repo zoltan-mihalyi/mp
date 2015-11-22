@@ -7,15 +7,19 @@ import java.lang.reflect.Method;
 public class InvocationEvent extends ClientEvent {
     @Getter
     private final Method method;
-    private final Object[] args;
+    private final Object[] arguments;
 
-    public InvocationEvent(int roomId, Method method, Object[] args) {
+    public InvocationEvent(int roomId, Method method, Object[] arguments) {
         super(roomId);
         this.method = method;
-        this.args = args.clone();
+        this.arguments = arguments.clone();
     }
 
     public int getArgumentsNumber() {
-        return args.length;
+        return arguments.length;
+    }
+
+    public Object[] getArguments() {
+        return arguments.clone();
     }
 }

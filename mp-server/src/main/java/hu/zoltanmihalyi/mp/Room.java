@@ -17,7 +17,7 @@ public abstract class Room {
         }
         Membership membership = new Membership(user, this);
         users.put(user, membership);
-        user.join(this);
+        user.join(membership);
         onJoin(membership);
     }
 
@@ -28,8 +28,9 @@ public abstract class Room {
     protected abstract void onJoin(Membership membership);
 
     public void removeUser(User user) {
+        Membership membership = getMembershipOf(user);
         users.remove(user);
-        user.leave(this);
+        user.leave(membership);
     }
 
     public List<User> getUsers() {

@@ -6,10 +6,12 @@ import java.util.Map;
 import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
 import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
 import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
+import lombok.Getter;
 
 public class Membership {
     private Map<Class<?>, Object> privileges = new HashMap<>();
     private User user;
+    @Getter
     private Room room;
 
     public Membership(User user, Room room) {

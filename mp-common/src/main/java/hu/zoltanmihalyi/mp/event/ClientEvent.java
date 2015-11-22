@@ -6,5 +6,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class ClientEvent {
     @Getter
-    private int roomId;
+    private int membershipId;
 }
