@@ -9,8 +9,8 @@ public class InvocationEvent extends ClientEvent {
     private final Method method;
     private final Object[] arguments;
 
-    public InvocationEvent(int roomId, Method method, Object[] arguments) {
-        super(roomId);
+    public InvocationEvent(int membershipId, Method method, Object[] arguments) {
+        super(membershipId);
         this.method = method;
         this.arguments = arguments.clone();
     }
