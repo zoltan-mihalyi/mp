@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Client implements Channel<ServerEvent> {
+public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
     private Map<Integer, String> roomIdToNameMap = new HashMap<>();
     private Map<EventTypeAndRoomName, List<Method>> eventListeners = new HashMap<>();
     private Channel<ClientEvent> targetChannel;
@@ -25,8 +25,9 @@ public class Client implements Channel<ServerEvent> {
         }
     }
 
-    public void setTargetChannel(Channel<ClientEvent> targetChannel) {
+    public Channel<ServerEvent> accept(Channel<ClientEvent> targetChannel) {
         this.targetChannel = targetChannel;
+        return new ServerEventChannel();
     }
 
     private Event getEventAnnotation(Method method) {
@@ -39,15 +40,6 @@ public class Client implements Channel<ServerEvent> {
             eventListeners.put(key, new ArrayList<>());
         }
         eventListeners.get(key).add(method);
-    }
-
-    @Override
-    public void onMessage(ServerEvent message) {
-        if (message instanceof JoinEvent) {
-            onJoin((JoinEvent) message);
-        } else if (message instanceof LeaveEvent) {
-            onLeave(((LeaveEvent) message));
-        }
     }
 
     private void onJoin(JoinEvent message) {
@@ -86,16 +78,6 @@ public class Client implements Channel<ServerEvent> {
         }
     }
 
-    @Override
-    public void onClose() {
-
-    }
-
-    @Override
-    public void onError(Exception e) {
-
-    }
-
     @EqualsAndHashCode
     @AllArgsConstructor
     private static class EventTypeAndRoomName {
@@ -117,5 +99,27 @@ public class Client implements Channel<ServerEvent> {
             }
             targetChannel.onMessage(new InvocationEvent(roomId, method, args));
         }
+    }
+
+    private class ServerEventChannel implements Channel<ServerEvent> {
+        @Override
+        public void onMessage(ServerEvent message) {
+            if (message instanceof JoinEvent) {
+                onJoin((JoinEvent) message);
+            } else if (message instanceof LeaveEvent) {
+                onLeave(((LeaveEvent) message));
+            }
+        }
+
+        @Override
+        public void onClose() {
+
+        }
+
+        @Override
+        public void onError(Exception e) {
+
+        }
+
     }
 }

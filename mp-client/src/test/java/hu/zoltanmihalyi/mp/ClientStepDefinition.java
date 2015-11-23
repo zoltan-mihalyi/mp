@@ -4,10 +4,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import hu.zoltanmihalyi.mp.event.ClientEvent;
-import hu.zoltanmihalyi.mp.event.InvocationEvent;
-import hu.zoltanmihalyi.mp.event.JoinEvent;
-import hu.zoltanmihalyi.mp.event.LeaveEvent;
+import hu.zoltanmihalyi.mp.event.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
@@ -15,18 +12,22 @@ import static org.mockito.Mockito.*;
 
 public class ClientStepDefinition {
     private MyClient client;
+    private Channel<ServerEvent> serverEventChannel;
     private RemoteRoom remoteRoom;
     private Channel<ClientEvent> targetChannel;
     private ClientEvent event;
 
-    @Given("^a client$")
+    @Given("^a client with a connection$")
     public void a_client() {
         client = spy(new MyClient());
+        @SuppressWarnings("unchecked")
+        Channel<ClientEvent> channel = mock(Channel.class);
+        serverEventChannel = client.accept(channel);
     }
 
     @When("^a room join event is fired$")
     public void a_room_join_event_is_fired() {
-        client.onMessage(new JoinEvent(0, "Room1"));
+        serverEventChannel.onMessage(new JoinEvent(0, "Room1"));
     }
 
     @Then("^the annotated join method is called$")
@@ -36,7 +37,7 @@ public class ClientStepDefinition {
 
     @When("^a room leave event is fired$")
     public void a_room_leave_event_is_fired() {
-        client.onMessage(new LeaveEvent(0));
+        serverEventChannel.onMessage(new LeaveEvent(0));
     }
 
     @Then("^the annotated leave method is called$")
@@ -66,7 +67,7 @@ public class ClientStepDefinition {
             public void onError(Exception e) {
             }
         });
-        client.setTargetChannel(targetChannel);
+        client.accept(targetChannel);
     }
 
     @When("^a privilege method is called on the RemoteRoom$")
@@ -83,7 +84,7 @@ public class ClientStepDefinition {
     public void the_event_should_contain_the_correct_class_method_and_parameters() throws NoSuchMethodException {
         InvocationEvent invocationEvent = (InvocationEvent) event;
         assertEquals(MyPrivilege.class.getMethod("doSomething"), invocationEvent.getMethod());
-        assertEquals(0,invocationEvent.getArgumentsNumber());
+        assertEquals(0, invocationEvent.getArgumentsNumber());
     }
 
     private class MyClient extends Client {
