@@ -16,6 +16,13 @@
 			<artifactId>mp-common</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>hu.zoltanmihalyi</groupId>
+			<artifactId>mp-common</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+			<type>test-jar</type>
+		</dependency>
 	</dependencies>
 
 

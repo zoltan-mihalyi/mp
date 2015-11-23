@@ -26,6 +26,12 @@ public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
     }
 
     public Channel<ServerEvent> accept(Channel<ClientEvent> targetChannel) {
+        if (targetChannel == null) {
+            throw new NullPointerException("Target channel cannot be null!");
+        }
+        if (this.targetChannel != null) {
+            throw new IllegalStateException("The client already accepted a connection!");
+        }
         this.targetChannel = targetChannel;
         return new ServerEventChannel();
     }

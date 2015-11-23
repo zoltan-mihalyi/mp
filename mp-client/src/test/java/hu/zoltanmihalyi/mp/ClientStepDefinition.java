@@ -18,8 +18,8 @@ public class ClientStepDefinition {
     private ClientEvent event;
 
     @Given("^a client with a connection$")
-    public void a_client() {
-        client = spy(new MyClient());
+    public void a_client_with_a_connection() {
+        a_client();
         @SuppressWarnings("unchecked")
         Channel<ClientEvent> channel = mock(Channel.class);
         serverEventChannel = client.accept(channel);
@@ -85,6 +85,22 @@ public class ClientStepDefinition {
         InvocationEvent invocationEvent = (InvocationEvent) event;
         assertEquals(MyPrivilege.class.getMethod("doSomething"), invocationEvent.getMethod());
         assertEquals(0, invocationEvent.getArgumentsNumber());
+    }
+
+    @Given("^a client$")
+    public void a_client() {
+        client = spy(new MyClient());
+    }
+
+    @Then("^adding a null reference to the client as target channel causes an exception$")
+    public void adding_a_null_reference_to_the_client_as_target_channel_causes_an_exception() {
+        Helper.verifyException(NullPointerException.class, () -> client.accept(null));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Then("^adding a target channel again causes an exception$")
+    public void adding_a_target_channel_again_causes_an_exception() {
+        Helper.verifyException(IllegalStateException.class, () -> client.accept(mock(Channel.class)));
     }
 
     private class MyClient extends Client {

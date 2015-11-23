@@ -18,3 +18,11 @@ Feature: Client
     When a privilege method is called on the RemoteRoom
     Then the client should send an invocation event
     And the event should contain the correct method and parameters
+
+  Scenario: A client receives a null reference as target channel
+    Given a client
+    Then adding a null reference to the client as target channel causes an exception
+
+  Scenario: Adding target channel two times causes an exception
+    Given a client with a connection
+    Then adding a target channel again causes an exception
