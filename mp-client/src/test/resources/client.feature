@@ -17,7 +17,7 @@ Feature: Client
     Given a room join event is fired
     When a privilege method is called on the RemoteRoom
     Then the client should send an invocation event
-    And the event should contain the correct method and parameters
+    And the event should contain the correct class, method and parameters
 
   Scenario: A client receives a null reference as target channel
     Given a client

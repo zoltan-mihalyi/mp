@@ -80,10 +80,11 @@ public class ClientStepDefinition {
         verify(targetChannel).onMessage(isA(InvocationEvent.class));
     }
 
-    @And("^the event should contain the correct method and parameters$")
-    public void the_event_should_contain_the_correct_class_method_and_parameters() throws NoSuchMethodException {
+    @And("^the event should contain the correct class, method and parameters$")
+    public void the_event_should_contain_the_correct_class_method_and_parameters() {
         InvocationEvent invocationEvent = (InvocationEvent) event;
-        assertEquals(MyPrivilege.class.getMethod("doSomething"), invocationEvent.getMethod());
+        assertEquals(MyPrivilege.class.getName(), invocationEvent.getClassName());
+        assertEquals("doSomething", invocationEvent.getMethodName());
         assertEquals(0, invocationEvent.getArgumentsNumber());
     }
 

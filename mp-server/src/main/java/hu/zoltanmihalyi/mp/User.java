@@ -30,8 +30,8 @@ public class User implements Channel<ClientEvent> {
     public void onMessage(ClientEvent message) {
         if (message instanceof InvocationEvent) {
             InvocationEvent event = ((InvocationEvent) message);
-            Method method = event.getMethod();
-            Object privilege = getEventMembership(event).getPrivilege(method.getDeclaringClass());
+            Object privilege = getEventMembership(event).getPrivilege(getEventClass(event));
+            Method method = getEventMethod(privilege, event);
             try {
                 method.invoke(privilege, event.getArguments());
             } catch (IllegalAccessException | InvocationTargetException e) {
@@ -56,5 +56,29 @@ public class User implements Channel<ClientEvent> {
             throw new MembershipNotFoundException("The membership of the user with the given id not found: " + roomId);
         }
         return membershipIdMap.getKey(roomId);
+    }
+
+    private static Method getEventMethod(Object privilege, InvocationEvent event) {
+        try {
+            String[] parameterTypeNames = event.getParameterTypes();
+            Class[] parameterTypes = new Class[parameterTypeNames.length];
+            for (int i = 0; i < parameterTypeNames.length; i++) {
+                parameterTypes[i] = Class.forName(parameterTypeNames[i]);
+            }
+
+            return privilege.getClass().getMethod(event.getMethodName(), parameterTypes);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Could not find the class of parameter type described in InvocationEvent!", e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException("Could not find method described in InvocationEvent!", e);
+        }
+    }
+
+    private static Class<?> getEventClass(InvocationEvent event) {
+        try {
+            return Class.forName(event.getClassName());
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("Could not find class described in InvocationEvent!", e);
+        }
     }
 }
