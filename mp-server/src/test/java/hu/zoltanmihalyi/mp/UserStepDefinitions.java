@@ -7,8 +7,9 @@ import cucumber.api.java.en.When;
 import hu.zoltanmihalyi.mp.event.InvocationEvent;
 import hu.zoltanmihalyi.mp.event.ServerEvent;
 import hu.zoltanmihalyi.mp.exception.MembershipNotFoundException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
 
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 public class UserStepDefinitions {
@@ -54,8 +55,13 @@ public class UserStepDefinitions {
 
     @And("^a privilege is added to the membership$")
     public void a_privilege_is_added_to_the_membership() {
-        privilege = mock(MyPrivilegeImpl.class);
+        privilege = spy(new MyPrivilegeImpl());
         membership.grant(MyPrivilege.class, privilege);
+    }
+
+    @When("^the privilege is marked not active$")
+    public void a_privilege_is_marked_not_active() {
+        privilege.setActive(false);
     }
 
     @When("^an invocation event is passed to the user's channel$")
@@ -73,15 +79,23 @@ public class UserStepDefinitions {
 
     }
 
-    @Then("^passing an invocation event to the user's channel results an exception$")
-    public void passing_an_invocation_event_to_the_user_s_channel_results_an_exception() {
+    @Then("^passing an invocation event to the user's channel results a MembershipNotFound exception$")
+    public void passing_an_invocation_event_to_the_user_s_channel_results_a_membership_not_found_exception() {
         Helper.verifyException(MembershipNotFoundException.class, this::an_invocation_event_is_passed_to_the_users_channel);
+    }
+
+    @Then("^passing an invocation event to the user's channel results a PrivilegeNotFound exception$")
+    public void passing_an_invocation_event_to_the_user_s_channel_results_a_privilege_not_found_exception() {
+        Helper.verifyException(PrivilegeNotFoundException.class, this::an_invocation_event_is_passed_to_the_users_channel);
     }
 
     private interface MyPrivilege {
         void doSomething();
     }
 
-    private abstract class MyPrivilegeImpl extends Privilege implements MyPrivilege {
+    private class MyPrivilegeImpl extends Privilege implements MyPrivilege {
+        @Override
+        public void doSomething() {
+        }
     }
 }

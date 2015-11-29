@@ -2,6 +2,7 @@ package hu.zoltanmihalyi.mp;
 
 import hu.zoltanmihalyi.mp.event.*;
 import hu.zoltanmihalyi.mp.exception.MembershipNotFoundException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,7 +31,10 @@ public class User implements Channel<ClientEvent> {
     public void onMessage(ClientEvent message) {
         if (message instanceof InvocationEvent) {
             InvocationEvent event = ((InvocationEvent) message);
-            Object privilege = getEventMembership(event).getPrivilege(getEventClass(event));
+            Privilege privilege = getEventMembership(event).getPrivilegeAsPrivilege(getEventClass(event));
+            if (!privilege.isActive()) {
+                throw new PrivilegeNotFoundException();
+            }
             Method method = getEventMethod(privilege, event);
             try {
                 method.invoke(privilege, event.getArguments());

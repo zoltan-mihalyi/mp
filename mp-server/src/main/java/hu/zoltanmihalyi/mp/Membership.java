@@ -9,7 +9,7 @@ import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
 import lombok.Getter;
 
 public class Membership {
-    private Map<Class<?>, Object> privileges = new HashMap<>();
+    private Map<Class<?>, Privilege> privileges = new HashMap<>();
     private User user;
     @Getter
     private Room room;
@@ -47,10 +47,14 @@ public class Membership {
 
     @SuppressWarnings("unchecked")
     public <T> T getPrivilege(Class<T> privilegeType) {
+        return (T) getPrivilegeAsPrivilege(privilegeType);
+    }
+
+    public Privilege getPrivilegeAsPrivilege(Class<?> privilegeType) {
         if (!hasPrivilege(privilegeType)) {
             throw new PrivilegeNotFoundException();
         }
-        return (T) privileges.get(privilegeType);
+        return privileges.get(privilegeType);
     }
 
     public void revoke() {
