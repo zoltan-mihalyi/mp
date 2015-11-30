@@ -11,7 +11,7 @@ import java.util.Map;
 public abstract class Room {
     private Map<User, Membership> users = new HashMap<>();
 
-    public void addUser(User user) {
+    public Membership addUser(User user) {
         if (contains(user)) {
             throw new UserAlreadyAddedException();
         }
@@ -19,6 +19,7 @@ public abstract class Room {
         users.put(user, membership);
         user.join(membership);
         onJoin(membership);
+        return membership;
     }
 
     public boolean contains(User user) {
