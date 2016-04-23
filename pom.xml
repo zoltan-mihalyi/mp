@@ -12,6 +12,7 @@
 		<module>mp-common</module>
 		<module>mp-server</module>
 		<module>mp-client</module>
+		<module>mp-test-common</module>
 	</modules>
 	<properties>
 		<cucumber.version>1.2.0</cucumber.version>

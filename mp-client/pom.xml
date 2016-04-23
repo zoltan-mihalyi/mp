@@ -18,7 +18,7 @@
 		</dependency>
 		<dependency>
 			<groupId>hu.zoltanmihalyi</groupId>
-			<artifactId>mp-common</artifactId>
+			<artifactId>mp-test-common</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 			<type>test-jar</type>
