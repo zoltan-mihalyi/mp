@@ -23,8 +23,11 @@ public class User implements Channel<ClientEvent> {
     }
 
     void leave(Membership membership) {
-        int id = membershipIdMap.getValue(membership);
-        channel.onMessage(new LeaveEvent(id));
+        channel.onMessage(new LeaveEvent(toId(membership)));
+    }
+
+    void update(Membership membership, Object data) {
+        channel.onMessage(new ReplicationEvent(toId(membership), data));
     }
 
     @Override
@@ -52,6 +55,10 @@ public class User implements Channel<ClientEvent> {
     @Override
     public void onError(Exception e) {
 
+    }
+
+    private int toId(Membership membership) {
+        return membershipIdMap.getValue(membership);
     }
 
     private Membership getEventMembership(ClientEvent event) {

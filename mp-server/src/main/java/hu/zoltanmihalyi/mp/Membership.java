@@ -6,22 +6,21 @@ import java.util.Map;
 import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
 import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
 import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
+import hu.zoltanmihalyi.mp.replication.Replicator;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+@RequiredArgsConstructor
 public class Membership {
     private Map<Class<?>, Privilege> privileges = new HashMap<>();
-    private User user;
     @Getter
-    private Room room;
-
-    public Membership(User user, Room room) {
-        this.user = user;
-        this.room = room;
-    }
-
-    public User getUser() {
-        return user;
-    }
+    private final User user;
+    @Getter
+    private final Room room;
+    @Getter
+    @Setter
+    private Replicator replicator; //todo should be final?
 
     public <T extends Privilege> void grant(Class<? super T> privilegeType, T privilege) {
         if (hasPrivilege(privilegeType)) {
@@ -59,5 +58,12 @@ public class Membership {
 
     public void revoke() {
         room.removeUser(user);
+    }
+
+    public void update() {
+        Object data = replicator.getData();
+        if (data != null) {
+            user.update(this, data);
+        }
     }
 }
