@@ -45,6 +45,7 @@ public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
         if (!eventListeners.containsKey(key)) {
             eventListeners.put(key, new ArrayList<>());
         }
+        method.setAccessible(true);
         eventListeners.get(key).add(method);
     }
 
