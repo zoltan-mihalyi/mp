@@ -4,84 +4,132 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import hu.zoltanmihalyi.mp.replication.Replicator;
 import hu.zoltanmihalyi.mp.event.ReplicationEvent;
 import hu.zoltanmihalyi.mp.event.ServerEvent;
 import hu.zoltanmihalyi.mp.replication.BruteForceReplicator;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
+import org.mockito.ArgumentCaptor;
+
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.*;
 
 public class ReplicationStepDefinitions {
-    private Membership membership;
-    private State state;
-    private ServerEvent event;
+    private State state = new State("test");
+    private Room room;
+    private Map<User, Channel<ServerEvent>> users = new HashMap<>();
+    private BruteForceReplicator<State> replicator;
+    private BruteForceReplicator<State> replicator2;
+    private State data;
 
-    @Given("^a user added to a room$")
-    public void a_membership_for_replication() {
-        User user = new User(new Channel<ServerEvent>() {
-            @Override
-            public void onMessage(ServerEvent message) {
-                event = message;
-            }
 
-            @Override
-            public void onClose() {
-            }
-
-            @Override
-            public void onError(Exception e) {
-            }
-        });
-        membership = new Room() {
+    @Given("^a room for replication")
+    public void a_room_for_replication() {
+        room = new Room() {
             @Override
             protected void onJoin(Membership membership) {
             }
-        }.addUser(user);
+        };
     }
 
-    @Given("^a replicator is set for the membership$")
-    public void a_replicator_is_set_for_the_membership() {
-        state = new State("test");
-        membership.setReplicator(new BruteForceReplicator<>(state, (State state) -> new State(state.data)));
+    @Given("^a membership in the room with a replicator$")
+    public void a_membership_in_the_room_with_a_replicator() {
+        addUserWithReplicator(createBruteForceReplicator());
     }
 
-    @When("^an update is called on the membership$")
-    public void an_update_is_called_on_the_membership() {
-        membership.update();
+    private BruteForceReplicator<State> createBruteForceReplicator() {
+        return new BruteForceReplicator<>(state, (State state1) -> new State(state1.data));
     }
 
-    @And("^another update is called on the membership$")
-    public void another_update_is_called_on_the_membership() {
-        event = null;
-        membership.update();
+    private void addUserWithReplicator(Replicator replicator) {
+        @SuppressWarnings("unchecked") Channel<ServerEvent> channel = mock(Channel.class);
+        User user = new User(channel);
+        Membership membership = room.addUser(user);
+        membership.setReplicator(replicator);
+        users.put(user, channel);
     }
 
-    @Then("^the user should receive the replication event$")
-    public void the_user_should_receive_the_replication_event() {
-        assertNotNull(event);
-        assertTrue(event instanceof ReplicationEvent);
+    @When("^calling update on the room$")
+    public void calling_update_on_the_room() {
+        room.update();
     }
 
-    @Then("^the replication event should contain the state$")
-    public void the_replication_event_should_contain_the_state() {
-        ReplicationEvent replicationEvent = (ReplicationEvent) event;
-        assertEquals(state, replicationEvent.getData());
+    @Then("^every user \\((\\d*)\\) was notified$")
+    public void every_user_was_notified(int num) {
+        assertEquals(num, users.size());
+        for (Channel<ServerEvent> channel : users.values()) {
+            verify(channel, times(1)).onMessage(isA(ReplicationEvent.class));
+        }
     }
 
-    @Then("^no replication event should be received$")
-    public void no_replication_event_should_be_received() {
-        assertNull(event);
+    @Given("^a brute force replicator$")
+    public void a_brute_force_replicator() {
+        replicator = createBruteForceReplicator();
+    }
+
+    @When("^getting replication data$")
+    public void getting_replication_data() {
+        data = replicator.getData();
+    }
+
+    @Then("^the data should contain the state$")
+    public void the_data_should_contain_the_state() {
+        assertEquals(state, data);
+    }
+
+    @Then("^no data should be returned$")
+    public void no_data_should_be_returned() {
+        assertNull(data);
     }
 
     @And("^the state is changed$")
     public void the_state_is_changed() {
         state.setData("test2");
     }
+
+    @And("^a membership in the room with the brute force replicator$")
+    public void a_membership_in_the_room_with_the_brute_force_replicator() {
+        addUserWithReplicator(replicator);
+    }
+
+    @And("^the replication data is the same$")
+    public void the_replication_data_is_the_same() {
+        verifyDifferentReplicationDataCount(1);
+    }
+
+    @And("^an other brute force replicator$")
+    public void an_other_brute_force_replicator() {
+        replicator2 = createBruteForceReplicator();
+    }
+
+    @And("^a membership in the room with the second brute force replicator$")
+    public void a_membership_in_the_room_with_the_second_brute_force_replicator() {
+        addUserWithReplicator(replicator2);
+    }
+
+    @And("^the replication data is only same for the first two users$")
+    public void the_replication_data_is_only_same_for_the_first_two_users() {
+        verifyDifferentReplicationDataCount(2);
+    }
+
+    private void verifyDifferentReplicationDataCount(int count) {
+        Map<Object, Object> replicationDataObjects = new IdentityHashMap<>();
+        for (Channel<ServerEvent> channel : users.values()) {
+            ArgumentCaptor<ReplicationEvent> captor = ArgumentCaptor.forClass(ReplicationEvent.class);
+            verify(channel, atLeastOnce()).onMessage(captor.capture());
+            Object data = captor.getValue().getData();
+            replicationDataObjects.put(data, null);
+        }
+        assertEquals(count, replicationDataObjects.size());
+    }
+
 
     @Data
     @EqualsAndHashCode

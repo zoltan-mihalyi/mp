@@ -3,10 +3,10 @@ package hu.zoltanmihalyi.mp;
 import java.util.HashMap;
 import java.util.Map;
 
-import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
 import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
-import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
 import hu.zoltanmihalyi.mp.replication.Replicator;
+import hu.zoltanmihalyi.mp.exception.PrivilegeAlreadyGrantedException;
+import hu.zoltanmihalyi.mp.exception.PrivilegeReuseException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -60,10 +60,7 @@ public class Membership {
         room.removeUser(user);
     }
 
-    public void update() {
-        Object data = replicator.getData();
-        if (data != null) {
-            user.update(this, data);
-        }
+    void update(Object data) {
+        user.update(this, data);
     }
 }

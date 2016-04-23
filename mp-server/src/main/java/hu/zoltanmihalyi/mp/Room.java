@@ -1,6 +1,7 @@
 package hu.zoltanmihalyi.mp;
 
 import hu.zoltanmihalyi.mp.exception.UserAlreadyAddedException;
+import hu.zoltanmihalyi.mp.replication.Replicator;
 import hu.zoltanmihalyi.mp.exception.UserNotFoundException;
 
 import java.util.ArrayList;
@@ -47,5 +48,22 @@ public abstract class Room {
             throw new UserNotFoundException();
         }
         return users.get(user);
+    }
+
+    public void update() {
+        MultiMap<Replicator, Membership> replicators = new MultiMap<>();
+
+        for (Membership membership : users.values()) {
+            replicators.put(membership.getReplicator(), membership);
+        }
+
+        for (Map.Entry<Replicator, List<Membership>> replicatorMemberships : replicators.entrySet()) {
+            Object data = replicatorMemberships.getKey().getData();
+            if (data != null) {
+                for (Membership membership : replicatorMemberships.getValue()) {
+                    membership.update(data);
+                }
+            }
+        }
     }
 }
