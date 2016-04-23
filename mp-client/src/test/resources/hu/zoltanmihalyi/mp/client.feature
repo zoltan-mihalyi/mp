@@ -13,7 +13,6 @@ Feature: Client
 
   Scenario: a privilege method is called
     Given a client with a connection
-    Given a target channel set to the client
     Given a room join event is fired
     When a privilege method is called on the RemoteRoom
     Then the client should send an invocation event

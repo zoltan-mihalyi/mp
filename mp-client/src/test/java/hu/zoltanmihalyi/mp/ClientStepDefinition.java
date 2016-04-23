@@ -5,6 +5,7 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hu.zoltanmihalyi.mp.event.*;
+import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.isA;
@@ -15,14 +16,13 @@ public class ClientStepDefinition {
     private Channel<ServerEvent> serverEventChannel;
     private RemoteRoom remoteRoom;
     private Channel<ClientEvent> targetChannel;
-    private ClientEvent event;
 
+    @SuppressWarnings("unchecked")
     @Given("^a client with a connection$")
     public void a_client_with_a_connection() {
         a_client();
-        @SuppressWarnings("unchecked")
-        Channel<ClientEvent> channel = mock(Channel.class);
-        serverEventChannel = client.accept(channel);
+        targetChannel = mock(Channel.class);
+        serverEventChannel = client.accept(targetChannel);
     }
 
     @When("^a room join event is fired$")
@@ -50,26 +50,6 @@ public class ClientStepDefinition {
         verify(client).onJoinRoom1(isA(RemoteRoom.class));
     }
 
-    @Given("^a target channel set to the client$")
-    @SuppressWarnings("unchecked")
-    public void a_target_channel_set_to_the_client() {
-        targetChannel = spy(new Channel<ClientEvent>() {
-            @Override
-            public void onMessage(ClientEvent message) {
-                event = message;
-            }
-
-            @Override
-            public void onClose() {
-            }
-
-            @Override
-            public void onError(Exception e) {
-            }
-        });
-        client.accept(targetChannel);
-    }
-
     @When("^a privilege method is called on the RemoteRoom$")
     public void a_privilege_method_is_called_on_the_remote_room() {
         remoteRoom.getPrivilege(MyPrivilege.class).doSomething();
@@ -82,7 +62,9 @@ public class ClientStepDefinition {
 
     @And("^the event should contain the correct class, method and parameters$")
     public void the_event_should_contain_the_correct_class_method_and_parameters() {
-        InvocationEvent invocationEvent = (InvocationEvent) event;
+        ArgumentCaptor<InvocationEvent> captor = ArgumentCaptor.forClass(InvocationEvent.class);
+        verify(targetChannel).onMessage(captor.capture());
+        InvocationEvent invocationEvent = captor.getValue();
         assertEquals(MyPrivilege.class.getName(), invocationEvent.getClassName());
         assertEquals("doSomething", invocationEvent.getMethodName());
         assertEquals(0, invocationEvent.getArgumentsNumber());
