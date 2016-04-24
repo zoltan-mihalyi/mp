@@ -6,11 +6,27 @@ import hu.zoltanmihalyi.mp.exception.PrivilegeNotFoundException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 public class User implements Channel<ClientEvent> {
     private Channel<ServerEvent> channel;
     private BiMap<Membership, Integer> membershipIdMap = new BiMap<>();
     private int lastId = 0;
+    private static Map<String, Class<?>> primitiveClasses = initializePrimitiveClasses();
+
+    private static Map<String, Class<?>> initializePrimitiveClasses() {
+        Map<String, Class<?>> result = new HashMap<>();
+        result.put("byte", byte.class);
+        result.put("short", short.class);
+        result.put("int", int.class);
+        result.put("long", long.class);
+        result.put("float", float.class);
+        result.put("double", double.class);
+        result.put("boolean", boolean.class);
+        result.put("char", char.class);
+        return result;
+    }
 
     public User(Channel<ServerEvent> channel) {
         this.channel = channel;
@@ -74,7 +90,7 @@ public class User implements Channel<ClientEvent> {
             String[] parameterTypeNames = event.getParameterTypes();
             Class[] parameterTypes = new Class[parameterTypeNames.length];
             for (int i = 0; i < parameterTypeNames.length; i++) {
-                parameterTypes[i] = Class.forName(parameterTypeNames[i]);
+                parameterTypes[i] = classForName(parameterTypeNames[i]);
             }
 
             return privilege.getClass().getMethod(event.getMethodName(), parameterTypes);
@@ -91,5 +107,13 @@ public class User implements Channel<ClientEvent> {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException("Could not find class described in InvocationEvent!", e);
         }
+    }
+
+    private static Class<?> classForName(String name) throws ClassNotFoundException {
+        Class<?> primitiveClass = primitiveClasses.get(name);
+        if (primitiveClass != null) {
+            return primitiveClass;
+        }
+        return Class.forName(name);
     }
 }
