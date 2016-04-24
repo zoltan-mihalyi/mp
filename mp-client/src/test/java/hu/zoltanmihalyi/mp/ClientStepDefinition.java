@@ -5,9 +5,11 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import hu.zoltanmihalyi.mp.event.*;
+import hu.zoltanmihalyi.mp.replication.ReplicatorClient;
 import org.mockito.ArgumentCaptor;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.*;
 
@@ -16,6 +18,8 @@ public class ClientStepDefinition {
     private Channel<ServerEvent> serverEventChannel;
     private RemoteRoom remoteRoom;
     private Channel<ClientEvent> targetChannel;
+    private ReplicatorClient<String> replicator;
+    private IllegalStateException replicatorException;
 
     @SuppressWarnings("unchecked")
     @Given("^a client with a connection$")
@@ -84,6 +88,41 @@ public class ClientStepDefinition {
     @Then("^adding a target channel again causes an exception$")
     public void adding_a_target_channel_again_causes_an_exception() {
         Helper.verifyException(IllegalStateException.class, () -> client.accept(mock(Channel.class)));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Given("^a replicator is set for the room$")
+    public void a_replicator_is_set_for_the_room() {
+        replicator = spy(new ReplicatorClient<String>() {
+            @Override
+            public void putData(String data) {
+            }
+
+            @Override
+            public Class<String> getDataClass() {
+                return String.class;
+            }
+        });
+        remoteRoom.setReplicator(replicator);
+    }
+
+    @When("^a replication event is fired$")
+    public void a_replication_event_is_fired() {
+        try {
+            serverEventChannel.onMessage(new ReplicationEvent(0, "test"));
+        } catch (IllegalStateException e) {
+            replicatorException = e;
+        }
+    }
+
+    @Then("^the replicator should be notified$")
+    public void the_replicator_should_be_notified() {
+        verify(replicator).putData("test");
+    }
+
+    @Then("^an exception should be thrown$")
+    public void an_exception_should_be_thrown() {
+        assertNotNull(replicatorException);
     }
 
     private class MyClient extends Client {

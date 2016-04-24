@@ -11,6 +11,19 @@ Feature: Client
     When a room leave event is fired
     Then the annotated leave method is called
 
+  Scenario: A client receives a replication event
+    Given a client with a connection
+    Given a room join event is fired
+    Given a replicator is set for the room
+    When a replication event is fired
+    Then the replicator should be notified
+
+  Scenario: A client receives a replication event when no replicator is set
+    Given a client with a connection
+    Given a room join event is fired
+    When a replication event is fired
+    Then an exception should be thrown
+
   Scenario: a privilege method is called
     Given a client with a connection
     Given a room join event is fired

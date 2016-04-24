@@ -1,6 +1,7 @@
 package hu.zoltanmihalyi.mp;
 
 import hu.zoltanmihalyi.mp.event.*;
+import hu.zoltanmihalyi.mp.replication.ReplicatorClient;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
-    private Map<Integer, String> roomIdToNameMap = new HashMap<>();
+    private Map<Integer, RemoteRoom> roomIdToRoomMap = new HashMap<>();
     private Map<EventTypeAndRoomName, List<Method>> eventListeners = new HashMap<>();
     private Channel<ClientEvent> targetChannel;
 
@@ -50,18 +51,32 @@ public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
     }
 
     private void onJoin(JoinEvent message) {
-        String roomName = message.getRoomName();
-        roomIdToNameMap.put(message.getRoomId(), roomName);
-        fireEvent(EventType.JOIN, roomName, new RemoteRoom(new RoomChannelImpl(message.getRoomId())));
+        int roomId = message.getRoomId();
+        RemoteRoom room = new RemoteRoom(new RoomChannelImpl(roomId), message.getRoomName());
+        roomIdToRoomMap.put(roomId, room);
+        fireEvent(EventType.JOIN, room);
     }
 
     private void onLeave(LeaveEvent message) {
-        String roomName = roomIdToNameMap.get(message.getRoomId());
-        fireEvent(EventType.LEAVE, roomName, null);
+        RemoteRoom room = roomIdToRoomMap.get(message.getRoomId());
+        fireEvent(EventType.LEAVE, room);
     }
 
-    private void fireEvent(EventType type, String roomName, RemoteRoom room) {
-        List<Method> methods = eventListeners.get(new EventTypeAndRoomName(type, roomName));
+    private void onReplication(ReplicationEvent message) {
+        RemoteRoom room = roomIdToRoomMap.get(message.getRoomId());
+        ReplicatorClient<?> replicator = room.getReplicator();
+        if (replicator == null) {
+            throw new IllegalStateException("No replicator set for room:" + room.getName());
+        }
+        putData(replicator, message.getData());
+    }
+
+    <T> void putData(ReplicatorClient<T> replicator, Object data) {
+        replicator.putData(replicator.getDataClass().cast(data));
+    }
+
+    private void fireEvent(EventType type, RemoteRoom room) {
+        List<Method> methods = eventListeners.get(new EventTypeAndRoomName(type, room.getName()));
         if (methods == null) {
             return;
         }
@@ -115,6 +130,8 @@ public class Client implements ChannelAcceptor<ClientEvent, ServerEvent> {
                 onJoin((JoinEvent) message);
             } else if (message instanceof LeaveEvent) {
                 onLeave(((LeaveEvent) message));
+            } else if (message instanceof ReplicationEvent) {
+                onReplication((ReplicationEvent) message);
             }
         }
 
